@@ -1,0 +1,4 @@
+:root{--card-radius:1rem}
+.card{border-radius:var(--card-radius)}
+img{max-width:100%;height:auto;display:block}
+.navbar-brand{letter-spacing:.3px}

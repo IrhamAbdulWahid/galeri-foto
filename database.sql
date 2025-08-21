@@ -1,0 +1,24 @@
+CREATE DATABASE IF NOT EXISTS `galeri_foto` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `galeri_foto`;
+
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `username` VARCHAR(50) NOT NULL UNIQUE,
+  `password_hash` VARCHAR(255) NOT NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS `categories` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `name` VARCHAR(100) NOT NULL,
+  `slug` VARCHAR(100) UNIQUE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS `photos` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `title` VARCHAR(150) NOT NULL,
+  `description` TEXT NULL,
+  `category_id` INT NULL,
+  `file_path` VARCHAR(255) NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT `fk_photos_category` FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON DELETE SET NULL
+) ENGINE=InnoDB;

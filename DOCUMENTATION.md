@@ -1,11 +1,11 @@
 # Website Galeri Foto — PHP Native + MySQL
 
 ## Deskripsi
-Aplikasi galeri foto dengan dua role:
-- **Admin**: login, kelola kategori, kelola foto (upload/edit/hapus), dashboard statistik.
-- **User (Publik)**: lihat beranda, galeri (filter kategori), dan detail foto.
+Aplikasi galeri foto & Cerita:
+- **Admin**: login, kelola kategori, kelola foto (upload/edit/hapus), Menunggu Persetujuan.
+- **User (Publik)**: lihat beranda, galeri (filter kategori), detail foto, download foto, request foto (dengan menunggu persetujuan dari admin).
 
-Stack: PHP Native, MySQL, Bootstrap 5.
+Stack: PHP Native, MySQL, Bootstrap 5, js, css.
 
 ## Struktur Folder
 ```
@@ -15,6 +15,10 @@ Stack: PHP Native, MySQL, Bootstrap 5.
 ├── detail.php
 ├── config.php
 ├── functions.php
+├── request.php
+├── download.php
+├── composer.json
+├── composer.lock
 ├── /includes
 │   ├── header.php
 │   └── footer.php
@@ -24,29 +28,21 @@ Stack: PHP Native, MySQL, Bootstrap 5.
 │   ├── dashboard.php
 │   ├── kategori.php
 │   ├── foto.php
+│   ├── pending_items.php
 │   └── seed_admin.php
 ├── /uploads
 └── /assets
     ├── /css/style.css
     └── /js/app.js
+├── /vendor     #fitur untuk mendowload berupa pdf
 ```
-
-## Instalasi Cepat
-1. Import database:
-   - Buka phpMyAdmin / terminal MySQL, jalankan `database.sql`.
-2. Konfigurasi koneksi di `config.php` (DB_USER, DB_PASS, dll).
-3. Buat admin default:
-   - Jalankan `http://host/galeri-foto/admin/seed_admin.php` sekali. (Akan membuat **admin/admin123**)
-4. Pastikan folder `uploads` memiliki izin tulis (writeable).
-5. Akses:
-   - Publik: `/index.php`
-   - Admin: `/admin/login.php`
-
 ## Keamanan Singkat
 - Password memakai `password_hash()` + `password_verify()` (bcrypt) md5.
 - Query menggunakan prepared statements (menghindari SQL Injection).
 - Form dilengkapi **CSRF token** dasar.
 - Validasi MIME dan ekstensi saat upload gambar (jpg/png/webp).
+- MIME type adalah tipe asli file yang dibaca dari header file, bukan cuma dari namanya.
+- MIME itu singkatan dari: Multipurpose Internet Mail Extensions
 
 ## Flowchart
 ### Admin Upload Foto
@@ -68,7 +64,7 @@ F -- Gagal --> D
 flowchart LR
 A[Start] --> B[Buka Website]
 B --> C[Pilih Kategori]
-C --> D[Foto tampil grid]
+C --> D[Foto tampil]
 D --> E[Klik Foto]
 E --> F[Lihat Detail]
 F --> G[End]

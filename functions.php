@@ -27,6 +27,13 @@ function is_logged_in() : bool {
     return isset($_SESSION['admin_id']);
 }
 
+// 🔑 Tambahan: cek apakah user adalah admin
+function is_admin() : bool {
+    // Untuk sekarang sama saja dengan is_logged_in()
+    // Kalau nanti ada role lain (user biasa, moderator), bisa diatur di sini
+    return isset($_SESSION['admin_id']);
+}
+
 function require_login() : void {
     if (!is_logged_in()) redirect('/admin/login.php');
 }

@@ -4,18 +4,18 @@ require_once __DIR__ . '/functions.php';
 // Ambil kategori dari URL
 $category_slug = trim($_GET['category'] ?? '');
 
-// Ambil semua kategori
+// Ambil semua kategori (selalu tampil)
 $cats = [];
-$res = db()->query("SELECT * FROM categories ORDER BY name ASC");
+$res = db()->query("SELECT id, name, slug FROM categories WHERE status='approved' ORDER BY name ASC");
 if ($res) $cats = $res->fetch_all(MYSQLI_ASSOC);
 
-// Foto Terbaru (FILTER kategori, max 10)
+// Ambil foto terbaru (filter kategori jika ada, hanya yang approved)
 if ($category_slug) {
     $stmt = db()->prepare("
         SELECT p.*, c.name AS category_name, c.slug AS category_slug
         FROM photos p
         LEFT JOIN categories c ON c.id = p.category_id
-        WHERE c.slug = ?
+        WHERE c.slug = ? AND p.status = 'approved'
         ORDER BY p.created_at DESC
         LIMIT 10
     ");
@@ -27,6 +27,7 @@ if ($category_slug) {
         SELECT p.*, c.name AS category_name, c.slug AS category_slug
         FROM photos p
         LEFT JOIN categories c ON c.id = p.category_id
+        WHERE p.status = 'approved'
         ORDER BY p.created_at DESC
         LIMIT 10
     ");
@@ -66,7 +67,9 @@ include __DIR__ . '/includes/header.php';
 <!-- Foto Terbaru -->
 <section class="container mb-5">
   <h2 class="h5 fw-semibold mb-4 animate-fade">
-    <?= $category_slug ? "Foto Terbaru di Kategori: " . esc($cats[array_search($category_slug, array_column($cats, 'slug'))]['name'] ?? 'Tidak Ditemukan') : "Foto Terbaru" ?>
+    <?= $category_slug 
+          ? "Foto Terbaru di Kategori: " . esc($cats[array_search($category_slug, array_column($cats, 'slug'))]['name'] ?? 'Tidak Ditemukan') 
+          : "Foto Terbaru" ?>
   </h2>
   <div class="masonry-grid">
     <?php foreach ($latest as $index => $p): ?>
@@ -91,7 +94,6 @@ include __DIR__ . '/includes/header.php';
     <?php endif; ?>
   </div>
 </section>
-
 
 <!-- CSS -->
 <style>

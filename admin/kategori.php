@@ -17,13 +17,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('/admin/kategori.php' . ($action === 'update' ? "?action=edit&id=$id" : ""));
     }
 
-    // hanya huruf, angka, spasi diperbolehkan
     if (!preg_match('/^[a-zA-Z0-9\s]+$/', $name)) {
         set_flash('error', 'Nama kategori hanya boleh berisi huruf, angka, dan spasi');
         redirect('/admin/kategori.php' . ($action === 'update' ? "?action=edit&id=$id" : ""));
     }
 
-    // Cek duplikat kategori (slug unik)
+    // Cek duplikat slug
     $stmt = db()->prepare("SELECT id FROM categories WHERE slug=? AND id!=?");
     $stmt->bind_param('si', $slug, $id);
     $stmt->execute();
@@ -35,8 +34,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // --- END VALIDASI ---
 
     if ($action === 'create') {
-        $stmt = db()->prepare("INSERT INTO categories(name, slug) VALUES(?, ?)");
-        $stmt->bind_param('ss', $name, $slug);
+        // admin bikin kategori → langsung approved
+        $status = 'approved';
+        $stmt = db()->prepare("INSERT INTO categories(name, slug, status) VALUES(?, ?, ?)");
+        $stmt->bind_param('sss', $name, $slug, $status);
         $stmt->execute();
         set_flash('ok', 'Kategori berhasil ditambahkan');
     } elseif ($action === 'update' && $id) {
@@ -57,7 +58,7 @@ if ($action === 'delete' && $id) {
     redirect('/admin/kategori.php');
 }
 
-// Ambil semua kategori
+// Ambil semua kategori (semua status)
 $categories = [];
 $res = db()->query("SELECT * FROM categories ORDER BY name ASC");
 if ($res) $categories = $res->fetch_all(MYSQLI_ASSOC);
@@ -109,7 +110,6 @@ include __DIR__ . '/../includes/header.php';
             <?php if ($edit): ?>
               <a class="btn btn-secondary" href="kategori.php">Batal</a>
             <?php endif; ?>
-            <a class="btn btn-outline-dark" href="dashboard.php">Kembali</a>
           </div>
         </form>
       </div>
@@ -128,6 +128,7 @@ include __DIR__ . '/../includes/header.php';
                 <th style="width:5%">No</th>
                 <th>Nama</th>
                 <th>Slug</th>
+                <th>Status</th>
                 <th style="width:15%" class="text-end">Aksi</th>
               </tr>
             </thead>
@@ -137,6 +138,15 @@ include __DIR__ . '/../includes/header.php';
                 <td><?= $i+1 ?></td>
                 <td><?= esc($c['name']) ?></td>
                 <td><span class="badge bg-secondary"><?= esc($c['slug']) ?></span></td>
+                <td>
+                  <?php if ($c['status'] === 'approved'): ?>
+                    <span class="badge bg-success">Approved</span>
+                  <?php elseif ($c['status'] === 'pending'): ?>
+                    <span class="badge bg-warning text-dark">Pending</span>
+                  <?php else: ?>
+                    <span class="badge bg-secondary"><?= esc($c['status']) ?></span>
+                  <?php endif; ?>
+                </td>
                 <td class="text-end">
                   <a href="?action=edit&id=<?= (int)$c['id'] ?>" class="btn btn-sm btn-outline-secondary">
                     <i class="bi bi-pencil"></i>
@@ -148,7 +158,7 @@ include __DIR__ . '/../includes/header.php';
               </tr>
               <?php endforeach; ?>
               <?php if (empty($categories)): ?>
-                <tr><td colspan="4" class="text-center text-muted">Belum ada kategori.</td></tr>
+                <tr><td colspan="5" class="text-center text-muted">Belum ada kategori.</td></tr>
               <?php endif; ?>
             </tbody>
           </table>

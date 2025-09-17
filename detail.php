@@ -46,7 +46,7 @@ include __DIR__ . '/includes/header.php';
       👁️ <?= (int)$photo['views'] ?> kali dilihat
     </div>
 
-    <a class="btn btn-outline-secondary btn-sm" href="<?= BASE_URL ?>/index.php">Kembali ke Galeri</a>
+    <a class="btn btn-outline-secondary btn-sm" href="<?= BASE_URL ?>/galeri.php">Kembali</a>
     <a href="download.php?id=<?= $photo['id'] ?>" class="btn btn-success">Download PDF</a>
   </div>
 </div>

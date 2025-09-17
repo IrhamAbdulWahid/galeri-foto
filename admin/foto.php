@@ -133,7 +133,7 @@ $res = db()->query("
     SELECT p.*, c.name AS category_name 
     FROM photos p 
     LEFT JOIN categories c ON c.id = p.category_id 
-    ORDER BY p.created_at DESC
+    ORDER BY p.created_at ASC
 ");
 if ($res) $photos = $res->fetch_all(MYSQLI_ASSOC);
 
@@ -196,7 +196,6 @@ include __DIR__ . '/../includes/header.php';
             <?php if ($edit): ?>
               <a class="btn btn-sm btn-secondary" href="foto.php">Batal</a>
             <?php endif; ?>
-            <a class="btn btn-sm btn-outline-dark ms-auto" href="dashboard.php">Kembali</a>
           </div>
         </form>
       </div>
@@ -212,7 +211,7 @@ include __DIR__ . '/../includes/header.php';
           <table class="table table-sm align-middle">
             <thead class="table-light">
               <tr>
-                <th>#</th>
+                <th>No</th>
                 <th>Foto</th>
                 <th>Judul</th>
                 <th>Kategori</th>
@@ -232,11 +231,11 @@ include __DIR__ . '/../includes/header.php';
                   <td><span class="badge bg-secondary"><?= esc($p['category_name'] ?? '—') ?></span></td>
                   <td>
                     <?php if ($p['status'] === 'approved'): ?>
-                      <span class="badge bg-success">Approved</span>
+                      <span class="badge bg-success">Disetujui</span>
                     <?php elseif ($p['status'] === 'pending'): ?>
-                      <span class="badge bg-warning text-dark">Pending</span>
+                      <span class="badge bg-warning text-dark">Tertunda</span>
                     <?php else: ?>
-                      <span class="badge bg-danger">Rejected</span>
+                      <span class="badge bg-danger">Ditolak</span>
                     <?php endif; ?>
                   </td>
                   <td class="text-muted small"><?= date('d M Y H:i', strtotime($p['created_at'])) ?></td>

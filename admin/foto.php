@@ -6,7 +6,7 @@ verify_csrf();
 $action = $_GET['action'] ?? '';
 $id     = (int)($_GET['id'] ?? 0);
 
-// Ambil kategori untuk select
+// --- Ambil kategori ---
 $cats = [];
 $res  = db()->query("SELECT * FROM categories ORDER BY name ASC");
 if ($res) $cats = $res->fetch_all(MYSQLI_ASSOC);
@@ -21,7 +21,7 @@ function handle_upload(array $file): ?string {
     $info = getimagesize($tmp);
     if (!$info) return null;
 
-    $ext     = image_type_to_extension($info[2], false); 
+    $ext     = image_type_to_extension($info[2], false);
     $allowed = ['jpg', 'jpeg', 'png', 'webp'];
     if (!in_array(strtolower($ext), $allowed, true)) return null;
 
@@ -40,14 +40,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $category_id = (int)($_POST['category_id'] ?? 0);
     $cat         = $category_id > 0 ? $category_id : null;
 
-    // --- VALIDASI INPUT ---
     if ($title === '') {
         set_flash('err', 'Judul tidak boleh kosong');
-        redirect('/admin/foto.php' . ($action === 'update' ? "?action=edit&id=$id" : ""));
-    }
-
-    if (!preg_match('/^[a-zA-Z0-9\s]+$/', $title)) {
-        set_flash('err', 'Judul hanya boleh berisi huruf, angka, dan spasi');
         redirect('/admin/foto.php' . ($action === 'update' ? "?action=edit&id=$id" : ""));
     }
 
@@ -55,13 +49,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = db()->prepare("SELECT id FROM categories WHERE id=?");
         $stmt->bind_param('i', $cat);
         $stmt->execute();
-        $cekCat = $stmt->get_result()->fetch_assoc();
-        if (!$cekCat) {
+        if (!$stmt->get_result()->fetch_assoc()) {
             set_flash('err', 'Kategori tidak valid.');
             redirect('/admin/foto.php' . ($action === 'update' ? "?action=edit&id=$id" : ""));
         }
     }
-    // --- END VALIDASI ---
 
     if ($action === 'create') {
         $file_path = handle_upload($_FILES['image'] ?? []);
@@ -118,7 +110,7 @@ if ($action === 'delete' && $id) {
     redirect('/admin/foto.php');
 }
 
-// Ambil data untuk EDIT
+// --- Ambil data edit ---
 $edit = null;
 if ($action === 'edit' && $id) {
     $stmt = db()->prepare("SELECT * FROM photos WHERE id=?");
@@ -127,7 +119,7 @@ if ($action === 'edit' && $id) {
     $edit = $stmt->get_result()->fetch_assoc();
 }
 
-// Ambil semua foto
+// --- Ambil semua foto ---
 $photos = [];
 $res = db()->query("
     SELECT p.*, c.name AS category_name 
@@ -140,7 +132,6 @@ if ($res) $photos = $res->fetch_all(MYSQLI_ASSOC);
 $title = 'Kelola Foto';
 include __DIR__ . '/../includes/header.php';
 ?>
-
 
 <div class="row g-4">
   <!-- Form Upload/Edit -->
@@ -208,15 +199,12 @@ include __DIR__ . '/../includes/header.php';
       <div class="card-header bg-light fw-bold">Daftar Foto</div>
       <div class="card-body">
         <div class="table-responsive">
-          <table class="table table-sm align-middle">
-            <thead class="table-light">
+          <table class="table table-hover align-middle table-sm">
+            <thead class="table-dark">
               <tr>
                 <th>No</th>
-                <th>Foto</th>
                 <th>Judul</th>
-                <th>Kategori</th>
                 <th>Status</th>
-                <th>Tanggal</th>
                 <th class="text-end">Aksi</th>
               </tr>
             </thead>
@@ -224,30 +212,51 @@ include __DIR__ . '/../includes/header.php';
               <?php foreach ($photos as $i => $p): ?>
                 <tr>
                   <td><?= $i+1 ?></td>
-                  <td style="width:70px">
-                    <img src="<?= BASE_URL ?>/uploads/<?= esc($p['file_path']) ?>" class="img-fluid rounded" alt="">
-                  </td>
-                  <td><?= esc($p['title']) ?></td>
-                  <td><span class="badge bg-secondary"><?= esc($p['category_name'] ?? '—') ?></span></td>
+                  <td class="fw-semibold"><?= esc($p['title']) ?></td>
                   <td>
                     <?php if ($p['status'] === 'approved'): ?>
-                      <span class="badge bg-success">Disetujui</span>
+                      <span class="badge bg-success px-2">✔ Disetujui</span>
                     <?php elseif ($p['status'] === 'pending'): ?>
-                      <span class="badge bg-warning text-dark">Tertunda</span>
+                      <span class="badge bg-warning text-dark px-2">⏳ Pending</span>
                     <?php else: ?>
-                      <span class="badge bg-danger">Ditolak</span>
+                      <span class="badge bg-danger px-2">✖ Ditolak</span>
                     <?php endif; ?>
                   </td>
-                  <td class="text-muted small"><?= date('d M Y H:i', strtotime($p['created_at'])) ?></td>
                   <td class="text-end">
+                    <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#detailModal<?= $p['id'] ?>"><i class="bi bi-eye"></i></button>
                     <a class="btn btn-sm btn-outline-secondary" href="?action=edit&id=<?= (int)$p['id'] ?>"><i class="bi bi-pencil"></i></a>
                     <a class="btn btn-sm btn-outline-danger btn-delete" href="?action=delete&id=<?= (int)$p['id'] ?>"><i class="bi bi-trash"></i></a>
                   </td>
                 </tr>
+
+                <!-- Modal Detail Foto -->
+                <div class="modal fade" id="detailModal<?= $p['id'] ?>" tabindex="-1" aria-hidden="true">
+                  <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content shadow-lg">
+                      <div class="modal-header bg-dark text-white">
+                        <h5 class="modal-title"><i class="bi bi-image"></i> <?= esc($p['title']) ?></h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                      </div>
+                      <div class="modal-body">
+                        <div class="row g-3">
+                          <div class="col-md-5 text-center">
+                            <img src="<?= BASE_URL ?>/uploads/<?= esc($p['file_path']) ?>" class="img-fluid rounded shadow-sm" alt="">
+                          </div>
+                          <div class="col-md-7">
+                            <p><strong>Kategori:</strong> <?= esc($p['category_name'] ?? '—') ?></p>
+                            <p><strong>Deskripsi:</strong><br><?= nl2br(esc($p['description'])) ?></p>
+                            <p><strong>Status:</strong> <?= esc($p['status']) ?></p>
+                            <p><strong>Tanggal:</strong> <?= date('d M Y H:i', strtotime($p['created_at'])) ?></p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               <?php endforeach; ?>
               <?php if (empty($photos)): ?>
                 <tr>
-                  <td colspan="7" class="text-center text-muted">Belum ada foto.</td>
+                  <td colspan="4" class="text-center text-muted">Belum ada foto</td>
                 </tr>
               <?php endif; ?>
             </tbody>
@@ -257,5 +266,9 @@ include __DIR__ . '/../includes/header.php';
     </div>
   </div>
 </div>
+
+<!-- SweetAlert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="../assets/js/app.js"></script>
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>

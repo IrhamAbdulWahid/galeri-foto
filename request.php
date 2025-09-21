@@ -72,7 +72,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $stmt = db()->prepare("INSERT INTO photos (title, description, category_id, file_path, status) VALUES (?, ?, ?, ?, 'pending')");
             $stmt->bind_param("ssis", $title, $description, $category_id, $filename);
             $stmt->execute();
-            $success = "Foto berhasil diajukan, menunggu persetujuan admin";
+            $success = "Foto berhasil diajukan, menunggu persetujuan admin, mohon ditung 1x24 jam.";
         } else {
             $errors[] = "Gagal menyimpan file foto";
         }

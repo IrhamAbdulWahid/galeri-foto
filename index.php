@@ -38,6 +38,33 @@ $title = 'Beranda';
 include __DIR__ . '/includes/header.php';
 ?>
 
+<!-- Modal Notifikasi -->
+<div class="modal fade" id="publicNotice" tabindex="-1" aria-labelledby="publicNoticeLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow-lg border-0">
+      <div class="modal-header text-white" 
+           style="background: linear-gradient(90deg, #ff8008, #ff3f34);">
+        <h5 class="modal-title fw-bold" id="publicNoticeLabel">
+          🔔 Pemberitahuan
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div class="modal-body text-center p-4">
+        <h5 class="mb-3">Website Galeri Foto & Cerita ini bersifat <span class="text-danger fw-bold">Publik</span></h5>
+        <p class="mb-0">
+          Semua foto yang telah disetujui <br>
+          akan ditampilkan dan bisa dilihat oleh siapa saja.
+        </p>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn btn-primary px-4" data-bs-dismiss="modal">
+          Saya Mengerti
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Hero Section -->
 <section class="mb-5 position-relative hero-cinematic text-center text-light">
   <div class="hero-overlay"></div>
@@ -151,4 +178,14 @@ include __DIR__ . '/includes/header.php';
   @keyframes photoIn { to { opacity: 1; transform: scale(1) translateY(0); } }
 </style>
 
+<!-- Script untuk menampilkan modal otomatis -->
+<script>
+  window.onload = function() {
+    if (!sessionStorage.getItem("publicNoticeShown")) {
+      var myModal = new bootstrap.Modal(document.getElementById('publicNotice'));
+      myModal.show();
+      sessionStorage.setItem("publicNoticeShown", "true");
+    }
+  }
+</script>
 <?php include __DIR__ . '/includes/footer.php'; ?>

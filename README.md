@@ -1,6 +1,3 @@
-# Galeri Foto (PHP Native + MySQL)
-Lihat `DOCUMENTATION.md` untuk panduan lengkap.
-
 # Website Galeri Foto — PHP Native + MySQL
 
 ## Deskripsi

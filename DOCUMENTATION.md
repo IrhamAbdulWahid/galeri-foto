@@ -35,6 +35,8 @@ Stack: PHP Native, MySQL, Bootstrap 5, js, css.
     ├── /css/style.css
     └── /js/app.js
 ├── /vendor     #fitur untuk mendowload berupa pdf
+└── /api
+    ├── /photos.php  #tes api jika dibutuhkan
 ```
 ## Keamanan Singkat
 - Password memakai `password_hash()` + `password_verify()` (bcrypt) md5.

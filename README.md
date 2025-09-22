@@ -46,7 +46,8 @@ Stack: PHP Native, MySQL, Bootstrap 5, js, css.
 - MIME type adalah tipe asli file yang dibaca dari header file, bukan cuma dari namanya.
 - MIME itu singkatan dari: Multipurpose Internet Mail Extensions
 
-## Flowchart berada di flow web galeri.jpg
+## flowchart.drawio.png
+flowchart galeri & cerita
 
 ## Lisensi
 Bebas digunakan untuk pembelajaran/Tugas Akhir.

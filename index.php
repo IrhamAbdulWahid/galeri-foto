@@ -1,38 +1,16 @@
 <?php
 require_once __DIR__ . '/functions.php';
 
-// Ambil kategori dari URL
-$category_slug = trim($_GET['category'] ?? '');
-
-// Ambil semua kategori (selalu tampil)
-$cats = [];
-$res = db()->query("SELECT id, name, slug FROM categories WHERE status='approved' ORDER BY name ASC");
-if ($res) $cats = $res->fetch_all(MYSQLI_ASSOC);
-
-// Ambil foto terbaru (filter kategori jika ada, hanya yang approved)
-if ($category_slug) {
-    $stmt = db()->prepare("
-        SELECT p.*, c.name AS category_name, c.slug AS category_slug
-        FROM photos p
-        LEFT JOIN categories c ON c.id = p.category_id
-        WHERE c.slug = ? AND p.status = 'approved'
-        ORDER BY p.created_at DESC
-        LIMIT 10
-    ");
-    $stmt->bind_param("s", $category_slug);
-    $stmt->execute();
-    $latest = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-} else {
-    $res = db()->query("
-        SELECT p.*, c.name AS category_name, c.slug AS category_slug
-        FROM photos p
-        LEFT JOIN categories c ON c.id = p.category_id
-        WHERE p.status = 'approved'
-        ORDER BY p.created_at DESC
-        LIMIT 10
-    ");
-    $latest = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
-}
+// Ambil foto terbaru (hanya yang approved)
+$res = db()->query("
+    SELECT p.*, c.name AS category_name, c.slug AS category_slug
+    FROM photos p
+    LEFT JOIN categories c ON c.id = p.category_id
+    WHERE p.status = 'approved'
+    ORDER BY p.created_at DESC
+    LIMIT 12
+");
+$latest = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
 
 $title = 'Beranda';
 include __DIR__ . '/includes/header.php';
@@ -76,28 +54,9 @@ include __DIR__ . '/includes/header.php';
   </div>
 </section>
 
-<!-- Filter Kategori -->
-<section class="mb-5 container animate-fade">
-  <form method="get" class="d-flex align-items-center gap-2">
-    <label for="category" class="fw-semibold">Kategori:</label>
-    <select name="category" id="category" class="form-select w-auto" onchange="this.form.submit()">
-      <option value="">All</option>
-      <?php foreach ($cats as $cat): ?>
-        <option value="<?= esc($cat['slug']) ?>" <?= $cat['slug'] === $category_slug ? 'selected' : '' ?>>
-          <?= esc($cat['name']) ?>
-        </option>
-      <?php endforeach; ?>
-    </select>
-  </form>
-</section>
-
 <!-- Foto Terbaru -->
 <section class="container mb-5">
-  <h2 class="h5 fw-semibold mb-4 animate-fade">
-    <?= $category_slug 
-          ? "Foto Terbaru di Kategori: " . esc($cats[array_search($category_slug, array_column($cats, 'slug'))]['name'] ?? 'Tidak Ditemukan') 
-          : "Foto Terbaru" ?>
-  </h2>
+  <h2 class="h5 fw-semibold mb-4 animate-fade">Foto Terbaru</h2>
   <div class="masonry-grid">
     <?php foreach ($latest as $index => $p): ?>
       <div class="masonry-item animate-photo" style="animation-delay: <?= $index * 0.2 ?>s;">

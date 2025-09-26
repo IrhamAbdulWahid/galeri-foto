@@ -27,9 +27,34 @@ if (!$photo) {
 $title = $photo['title'];
 include __DIR__ . '/includes/header.php';
 ?>
+
+<style>
+  /* 🔹 Atur ukuran foto preview di halaman detail */
+  .detail-photo {
+    max-width: 400px;   /* preview lebih kecil */
+    width: 100%;
+    height: auto;
+    cursor: pointer;    /* kasih cursor pointer biar kelihatan bisa diklik */
+    transition: transform 0.2s ease-in-out;
+  }
+  .detail-photo:hover {
+    transform: scale(1.02);
+  }
+  /* Modal gambar full */
+  .modal-img {
+    max-width: 100%;
+    height: auto;
+  }
+</style>
+
 <div class="row g-4">
-  <div class="col-12 col-md-7">
-    <img class="w-100 rounded" src="<?= BASE_URL ?>/uploads/<?= esc($photo['file_path']) ?>" alt="<?= esc($photo['title']) ?>">
+  <div class="col-12 col-md-7 text-center">
+    <!-- 🔹 Foto preview kecil, klik untuk buka modal -->
+    <img class="detail-photo rounded shadow" 
+         src="<?= BASE_URL ?>/uploads/<?= esc($photo['file_path']) ?>" 
+         alt="<?= esc($photo['title']) ?>"
+         data-bs-toggle="modal" 
+         data-bs-target="#photoModal">
   </div>
   <div class="col-12 col-md-5">
     <h1 class="h4"><?= esc($photo['title']) ?></h1>
@@ -50,4 +75,22 @@ include __DIR__ . '/includes/header.php';
     <a href="download.php?id=<?= $photo['id'] ?>" class="btn btn-success">Download PDF</a>
   </div>
 </div>
+
+<!-- 🔹 Modal Bootstrap untuk tampilkan foto full -->
+<div class="modal fade" id="photoModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content bg-dark text-center">
+      <div class="modal-body p-2">
+        <img src="<?= BASE_URL ?>/uploads/<?= esc($photo['file_path']) ?>" 
+             alt="<?= esc($photo['title']) ?>" 
+             class="modal-img rounded">
+      </div>
+      <div class="modal-footer border-0 justify-content-between">
+        <span class="text-white small"><?= esc($photo['title']) ?></span>
+        <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Tutup</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <?php include __DIR__ . '/includes/footer.php'; ?>
